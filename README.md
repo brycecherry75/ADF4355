@@ -20,7 +20,7 @@ PFD based on reference double/divide by 2 and R value limits to avoid warnings o
 
 > 0.16383 to 1.6383 MHz PFD: No more than 4 decimal places
 
-> 1.6383 to 1.6383 MHz PFD: No more than 3 decimal places
+> 1.6383 to 16.383 MHz PFD: No more than 3 decimal places
 
 > 16.383 to 125 MHz PFD: No more than 2 decimal places
 
@@ -34,7 +34,7 @@ Requires the BeyondByte library: http://github.com/brycecherry75/BeyondByte
 + Output Level: -4 dBm to 5 dBm (in 3 dB steps) 
 + In-Band Phase Noise: -221 dBc/Hz
 + Signal On/Off control
-+ All ADF4355_R[] registers can be accessed and manipulated including ChargePumpCurrent (0.3125-5)
++ All ADF4355_R[] registers can be accessed and manipulated including ChargePumpCurrent (0.3125-5 in mA)
 
 ## Library Use
 
@@ -64,11 +64,14 @@ ReadSweepRegs(*regs): high speed read for registers when used for frequency swee
 
 Please note that you should install the provided BigNumber library in your Arduino library directory.
 
-Default settings which may need to be changed as required BEFORE execution of ADF4355 library functions (defaults listed):
+Default settings which may need to be changed as required BEFORE execution of ADF4355 library functions:
 
-MUX logic level (Register 4/Bit 8 = 1): 3.3V level
+MUX logic level (Register 4/Bit 8): 3.3V level (1 - default), 1.8V level (0)
 
-Phase Detector Polarity (Register 4/Bit 6 = 1): Negative (passive or noninverting active loop filter)
+Phase Detector Polarity (Register 4/Bit 6): Negative (passive or noninverting active loop filter) (1 - default), Postive (inverting active loop filter) (0)
+
+Certain RF output circuitry and/or board layouts may result in issues with harmonics when tuned to an RF frequency below 200-250 MHz - a frequency counter can display a harmonic frequency under these conditions.
+
 
 Error codes:
 
