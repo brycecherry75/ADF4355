@@ -59,6 +59,11 @@
 #define ADF4355_ERROR_SINGLE_ENDED_RANGE 19
 #define ADF4355_ERROR_PFD_LIMITS 20
 
+// ReadCurrentFrequency
+#define ADF4355_DIGITS 10
+#define ADF4355_DECIMAL_PLACES 6
+#define ADF4355_ReadCurrentFrequency_ArraySize (ADF4355_DIGITS + ADF4355_DECIMAL_PLACES + 2) // including decimal point and null terminator
+
 class ADF4355
 {
   public:
@@ -90,6 +95,7 @@ class ADF4355
 
     void ReadSweepValues(uint32_t *regs);
     void WriteSweepValues(const uint32_t *regs);
+    void ReadCurrentFrequency(uint8_t *freq);
 
     SPISettings ADF4355_SPI;
     uint32_t ADF4355_reffreq = ADF4355_REF_FREQ_DEFAULT;

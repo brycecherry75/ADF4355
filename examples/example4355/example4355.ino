@@ -131,6 +131,10 @@ void PrintVFOstatus() {
   Serial.println(vfo.ReadALCtimeout());
   Serial.print(F("Synthesizer timeout: "));
   Serial.println(vfo.ReadSynthTimeout());
+  Serial.print(F("Current frequency (Hz): "));
+  char CurrentFreq[ADF4355_ReadCurrentFrequency_ArraySize];
+  vfo.ReadCurrentFrequency(CurrentFreq);
+  Serial.println(CurrentFreq);
 }
 
 void PrintErrorCode(byte value) {
