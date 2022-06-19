@@ -70,6 +70,7 @@ class ADF4355
     ADF4355();
     uint8_t ADF4355_PIN_SS = 10;   ///< Ard Pin for SPI Slave Select
 
+    bool ADCdelayRequired = true; // can be false for speed in sweep operation
     float ChargePumpCurrent = 0.9; // mA - rounded to the nearest 0.3125 mA step - recommended by datasheet for minimum spurs
 
     uint16_t ReadR();
@@ -95,7 +96,7 @@ class ADF4355
 
     void ReadSweepValues(uint32_t *regs);
     void WriteSweepValues(const uint32_t *regs);
-    void ReadCurrentFrequency(uint8_t *freq);
+    void ReadCurrentFrequency(char *freq);
 
     SPISettings ADF4355_SPI;
     uint32_t ADF4355_reffreq = ADF4355_REF_FREQ_DEFAULT;

@@ -35,6 +35,7 @@ Requires the BeyondByte library: http://github.com/brycecherry75/BeyondByte
 + In-Band Phase Noise: -221 dBc/Hz
 + Signal On/Off control
 + All ADF4355_R[] registers can be accessed and manipulated including ChargePumpCurrent (0.3125-5 in mA)
++ ADCdelayRequired bool can be false for increased sweep speed (true by default for accuracy)
 
 ## Library Use
 

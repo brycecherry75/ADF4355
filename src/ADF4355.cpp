@@ -125,7 +125,7 @@ void ADF4355::InitRegs() { // ADF4355: Register Initialization Sequence
   }
 
   for (int i = 12; i >= 0; i--) {
-    if (i == 0) {
+    if (i == 0 && ADCdelayRequired == true) {
       delayMicroseconds(ADF4355_ADC16cyclesDelay_uS);
     }
     SelectSPI();
@@ -163,7 +163,9 @@ void ADF4355::UpdateFrequencyRegs() {
         ADF4355_R[RegisterToWrite] = BitFieldManipulation.WriteBF_dword(4, 1, ADF4355_R[RegisterToWrite], 0); // disable counter reset
         break;
       case 7:
-        delayMicroseconds(ADF4355_ADC16cyclesDelay_uS);
+        if (ADCdelayRequired == true) {
+          delayMicroseconds(ADF4355_ADC16cyclesDelay_uS);
+        }
         RegisterToWrite = 0;
         ADF4355_R[RegisterToWrite] = BitFieldManipulation.WriteBF_dword(21, 1, ADF4355_R[RegisterToWrite], 1); // enable autocalibration
         break;
@@ -261,7 +263,7 @@ double ADF4355::ReadPFDfreq() {
   return value;
 }
 
-void ADF4355::ReadCurrentFrequency(uint8_t *freq)
+void ADF4355::ReadCurrentFrequency(char *freq)
 {
   BigNumber::begin(20);
   char tmpstr[12];

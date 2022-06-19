@@ -9,6 +9,7 @@
   STEP frequency_in_Hz - set channel step
   STATUS - view status of VFO
   CE (ON/OFF) - enable/disable ADF4355
+  ADC_DELAY (ON/OFF) - enable/disable ADC delay for frequency setting (OFF for higher speed in sweep)
 
 */
 
@@ -420,6 +421,18 @@ void loop() {
         }
         else if (strcmp(field, "OFF") == 0) {
           digitalWrite(CEpin, LOW);
+        }
+        else {
+          ValidField = false;
+        }
+      }
+      else if (strcmp(field, "ADC_DELAY") == 0) {
+        getField(field, 1);
+        if (strcmp(field, "ON") == 0) {
+          vfo.ADCdelayRequired = true;
+        }
+        else if (strcmp(field, "OFF") == 0) {
+          vfo.ADCdelayRequired = false;
         }
         else {
           ValidField = false;
