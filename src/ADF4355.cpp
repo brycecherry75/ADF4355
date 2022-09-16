@@ -598,3 +598,31 @@ int ADF4355::setrf(uint32_t f, uint16_t r, uint8_t ReferenceDivisionType, uint8_
   InitRegs();
   return ADF4355_ERROR_NONE;
 }
+
+int ADF4355::setPowerLevel(uint8_t PowerLevel) {
+  if (PowerLevel < 0 && PowerLevel > 4) return ADF4355_ERROR_POWER_LEVEL;
+  if (PowerLevel == 0) {
+    ADF4355_R[6] = BitFieldManipulation.WriteBF_dword(6, 1, ADF4355_R[6], 0);
+  }
+  else {
+    PowerLevel--;
+    ADF4355_R[6] = BitFieldManipulation.WriteBF_dword(6, 1, ADF4355_R[6], 1);
+    ADF4355_R[6] = BitFieldManipulation.WriteBF_dword(4, 2, ADF4355_R[6], PowerLevel);
+  }
+  UpdateFrequencyRegs();
+  return ADF4355_ERROR_NONE;
+}
+
+int ADF4355::setAuxPowerLevel(uint8_t PowerLevel) {
+  if (PowerLevel < 0 && PowerLevel > 4) return ADF4355_ERROR_POWER_LEVEL;
+  if (PowerLevel == 0) {
+    ADF4355_R[6] = BitFieldManipulation.WriteBF_dword(9, 1, ADF4355_R[6], 0);
+  }
+  else {
+    PowerLevel--;
+    ADF4355_R[6] = BitFieldManipulation.WriteBF_dword(9, 1, ADF4355_R[6], 1);
+    ADF4355_R[6] = BitFieldManipulation.WriteBF_dword(7, 2, ADF4355_R[6], PowerLevel);
+  }
+  UpdateFrequencyRegs();
+  return ADF4355_ERROR_NONE;
+}

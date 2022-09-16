@@ -19,6 +19,8 @@ ReadALCtimeout	KEYWORD2
 ReadSynthTimeout	KEYWORD2
 setf	KEYWORD2
 setrf	KEYWORD2
+setPowerLevel	KEYWORD2
+setAuxPowerLevel	KEYWORD2
 ReadSweepValues	KEYWORD2
 WriteSweepValues	KEYWORD2
 ADF4355_REF_UNDIVIDED	LITERAL1

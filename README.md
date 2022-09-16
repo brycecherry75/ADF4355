@@ -1,6 +1,16 @@
 # ADF4355
 Arduino Library for the ADF4355 Microwave Wideband Frequency Synthesizer chip
 
+v1.0.0 First release
+
+v1.0.1 Double buffering of RF frequency divider implemented by default
+
+v1.1.0 Added current frequency read function
+
+v1.1.1 Corrected issue with conversion in ReadCurrentFreq
+
+v1.1.2 Add setPowerLevel function which can be used for frequency bursts
+
 ## Introduction
 
 This library supports the [ADF4355 Chip](https://www.analog.com/en/products/adf4355.html) from Analog Devices on Arduinos. The chip is a wideband (53.125 MHz to 6.8 GHz) Phase-Locked Loop (PLL) and Voltage Controlled Oscillator (VCO), covering a very wide range frequency range under digital control. Just add an external PLL loop filter, Reference frequency source and a power supply for a very useful frequency generator for applications as a Local Oscillator or Sweep Generator.  
