@@ -11,6 +11,8 @@ v1.1.1 Corrected issue with conversion in ReadCurrentFreq
 
 v1.1.2 Add setPowerLevel function which can be used for frequency bursts
 
+v1.1.3 Add setCPcurrent for adjusting charge pump current
+
 ## Introduction
 
 This library supports the [ADF4355 Chip](https://www.analog.com/en/products/adf4355.html) from Analog Devices on Arduinos. The chip is a wideband (53.125 MHz to 6.8 GHz) Phase-Locked Loop (PLL) and Voltage Controlled Oscillator (VCO), covering a very wide range frequency range under digital control. Just add an external PLL loop filter, Reference frequency source and a power supply for a very useful frequency generator for applications as a Local Oscillator or Sweep Generator.  
@@ -68,6 +70,8 @@ setf(*frequency, PowerLevel, AuxPowerLevel, CalculationTimeout): set the frequen
 power level (1-4 in 3dBm steps from -5dBm) and calculation timeout in mS - returns an error code
 
 setrf(frequency, R_divider, ReferenceDivisionType, ReferenceInputType): set the reference frequency, reference divider R, reference frequency division type (ADF4355_REF_(UNDIVIDED/HALF/DOUBLE) and reference frequency input type (ADF4355_REF_SINGLE_ENDED/ADF4355_REF_DIFFERENTIAL) - default is 10 MHz/1/undivided/single ended - returns an error code - this is required for initialization and will also set the charge pump current defined by the ChargePumpCurrent float
+
+setCPcurrent(current_in_mA_floating): set charge pump current in mA (default of 0.9 mA is recommended by manufacturer for lowest spurs)
 
 WriteSweepRegs(*regs): high speed write for registers when used for frequency sweep (*regs is uint32_t and size is as per ADF4355_RegsToWrite
 

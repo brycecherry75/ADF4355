@@ -5,12 +5,14 @@
   Commands:
   REF reference_frequency_in_Hz reference_divider reference_multiplier(HALF/DOUBLE/UNDIVIDED) reference_input(SINGLE_ENDED/DIFFERENTIAL) - Set reference frequency, reference divider and reference input type
   FREQ frequency_in_Hz power_level(1-4) auxpower_level(1-4) timeout_in_mS - set RF frequency and power levels with frequency calculation timeout
+  FREQ_DIRECT R_divider, INT_value, FRAC1_value, FRAC2_value, MOD2_value, RF_DIVIDER_value, PRESCALER_value - sets RF parameters directly
   (BURST/BURST_CONT/BURST_SINGLE) on_time_in_uS off time_in_uS count (AUX) - perform a on/off burst on frequency and power level set with FREQ/FREQ_P - count is only used with BURST_CONT - if AUX is used, will burst on the auxiliary output; otherwise, it will burst on the primary output
   SWEEP start_frequency stop_frequency step_in_mS(1-32767) power_level(1-4) aux_power_level(1-4) timeout_in_mS - sweep RF frequency with frequency calculation timeout
   STEP frequency_in_Hz - set channel step
   STATUS - view status of VFO
   CE (ON/OFF) - enable/disable ADF4355
   ADC_DELAY (ON/OFF) - enable/disable ADC delay for frequency setting (OFF for higher speed in sweep)
+  CP_CURRENT current_in_mA_floating - adjust charge pump current to suit your loop filter (default library value is 0.9 mA)
 
 */
 
@@ -291,6 +293,23 @@ void loop() {
           PrintErrorCode(ErrorCode);
         }
       }
+      else if (strcmp(field, "FREQ_DIRECT") == 0) {
+        getField(field, 1);
+        word R_divider = atoi(field);
+        getField(field, 2);
+        word INT_value = atol(field);
+        getField(field, 3);
+        unsigned long FRAC1_value = atoi(field);
+        getField(field, 4);
+        word FRAC2_value = atoi(field);
+        getField(field, 5);
+        word MOD2_value = atoi(field);
+        getField(field, 6);
+        byte RF_DIVIDER_value = atoi(field);
+        getField(field, 7);
+        byte PRESCALER_value = atoi(field);
+        vfo.setfDirect(R_divider, INT_value, FRAC1_value, FRAC2_value, MOD2_value, RF_DIVIDER_value, PRESCALER_value);
+      }
       else if (strcmp(field, "BURST") == 0 || strcmp(field, "BURST_CONT") == 0 || strcmp(field, "BURST_SINGLE") == 0) {
         bool ContinuousBurst = false;
         bool SingleBurst = false;
@@ -531,6 +550,11 @@ void loop() {
         else {
           ValidField = false;
         }
+      }
+      else if (strcmp(field, "CP_CURRENT") == 0) {
+        getField(field, 1);
+        float ChargePumpCurrent = atof(field);
+        vfo.setCPcurrent(ChargePumpCurrent);
       }
       else {
         ValidField = false;

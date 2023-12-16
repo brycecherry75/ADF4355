@@ -49,12 +49,7 @@
 
 ADF4355::ADF4355()
 {
-#if !defined(ARDUINO_SAM_DUE) // Uno or Zero
-  SPISettings ADF4355_SPI(16000000UL, MSBFIRST, SPI_MODE0);
-#endif
-#if defined(ARDUINO_SAM_DUE)
-  SPISettings ADF4355_SPI(50000000UL, MSBFIRST, SPI_MODE0);
-#endif
+  SPISettings ADF4355_SPI(10000000UL, MSBFIRST, SPI_MODE0);
 }
 
 void ADF4355::SelectSPI() {
@@ -549,6 +544,14 @@ int  ADF4355::setf(char *freq, uint8_t PowerLevel, uint8_t AuxPowerLevel, uint32
   }
   ADF4355_R[6] = BitFieldManipulation.WriteBF_dword(13, 8, ADF4355_R[6], ADF4355_BleedCurrent);  
 
+  // set Lock Detect Mode
+  if (ADF4355_Frac1 == 0 && ADF4355_Frac2 == 0) {
+    ADF4355_R[7] = BitFieldManipulation.WriteBF_dword(4, 1, ADF4355_R[7], 1);
+  }
+  else {
+    ADF4355_R[7] = BitFieldManipulation.WriteBF_dword(4, 1, ADF4355_R[7], 0);
+  }
+
   UpdateFrequencyRegs();
   if (FrequencyError == false) {
     return ADF4355_ERROR_NONE;
@@ -599,6 +602,83 @@ int ADF4355::setrf(uint32_t f, uint16_t r, uint8_t ReferenceDivisionType, uint8_
   return ADF4355_ERROR_NONE;
 }
 
+void ADF4355::setfDirect(uint16_t R_divider, uint16_t INT_value, uint32_t FRAC1_value, uint16_t FRAC2_value, uint16_t MOD2_value, uint8_t RF_DIVIDER_value, uint8_t PRESCALER_value) {
+  switch (RF_DIVIDER_value) {
+    case 1:
+      RF_DIVIDER_value = 0;
+      break;
+    case 2:
+      RF_DIVIDER_value = 1;
+      break;
+    case 4:
+      RF_DIVIDER_value = 2;
+      break;
+    case 8:
+      RF_DIVIDER_value = 3;
+      break;
+    case 16:
+      RF_DIVIDER_value = 4;
+      break;
+    case 32:
+      RF_DIVIDER_value = 5;
+      break;
+    case 64:
+      RF_DIVIDER_value = 6;
+      break;
+  }
+
+  ADF4355_R[4] = BitFieldManipulation.WriteBF_dword(15, 10, ADF4355_R[4], R_divider);
+  ADF4355_R[0] = BitFieldManipulation.WriteBF_dword(4, 16, ADF4355_R[0], INT_value);
+  ADF4355_R[1] = BitFieldManipulation.WriteBF_dword(4, 24, ADF4355_R[1], FRAC1_value); // main fractional value;
+  ADF4355_R[2] = BitFieldManipulation.WriteBF_dword(4, 14, ADF4355_R[2], MOD2_value); // auxiliary modulus
+  ADF4355_R[2] = BitFieldManipulation.WriteBF_dword(18, 14, ADF4355_R[2], FRAC2_value); // auxiliary fraction
+  ADF4355_R[6] = BitFieldManipulation.WriteBF_dword(21, 3, ADF4355_R[6], RF_DIVIDER_value); // RF divider
+  // (0x00, 20, 1, 0); // prescaler - with 4/5 prescaler for maximum of 6.8 GHz, no need to change to 8/9
+
+  if ((FRAC1_value != 0 || FRAC2_value != 0) && ReadPFDfreq() <= 100000000UL) { // enable negative bleed under fractional mode and if PFD <= 100 MHz
+    ADF4355_R[6] = BitFieldManipulation.WriteBF_dword(29, 1, ADF4355_R[6], 1);
+  }
+  else { // disable negative bleed under integer mode or if PFD > 100 MHz
+    ADF4355_R[6] = BitFieldManipulation.WriteBF_dword(29, 1, ADF4355_R[6], 0);
+  }
+
+  // calculate charge pump bleed current based on N value and charge pump current
+  uint32_t ADF4355_BleedCurrent = BitFieldManipulation.ReadBF_dword(10, 4, ADF4355_R[4]);
+  ADF4355_BleedCurrent++; // Step 0 is 0.3125 mA
+  ADF4355_BleedCurrent *= 31250000UL; // 100pA multiples for fidelity per step
+  ADF4355_BleedCurrent *= 4;
+  ADF4355_BleedCurrent /= INT_value;
+  ADF4355_BleedCurrent /= 3750;
+  ADF4355_BleedCurrent += 50; // ceiling
+  ADF4355_BleedCurrent /= 100; // remove the decimal place
+  if (ADF4355_BleedCurrent > 255) {
+    ADF4355_BleedCurrent = 255;
+  }
+  ADF4355_R[6] = BitFieldManipulation.WriteBF_dword(13, 8, ADF4355_R[6], ADF4355_BleedCurrent);  
+
+  // set Lock Detect Mode
+  if (FRAC1_value == 0 && FRAC2_value == 0) {
+    ADF4355_R[7] = BitFieldManipulation.WriteBF_dword(4, 1, ADF4355_R[7], 1);
+  }
+  else {
+    ADF4355_R[7] = BitFieldManipulation.WriteBF_dword(4, 1, ADF4355_R[7], 0);
+  }
+  if ((FRAC1_value != 0 || FRAC2_value != 0) && ReadPFDfreq() <= 100000000UL) { // enable negative bleed under fractional mode and if PFD <= 100 MHz
+    ADF4355_R[6] = BitFieldManipulation.WriteBF_dword(29, 1, ADF4355_R[6], 1);
+  }
+  else { // disable negative bleed under integer mode or if PFD > 100 MHz
+    ADF4355_R[6] = BitFieldManipulation.WriteBF_dword(29, 1, ADF4355_R[6], 0);
+  }
+  // set Lock Detect Mode
+  if (FRAC1_value == 0 && FRAC2_value == 0) {
+    ADF4355_R[7] = BitFieldManipulation.WriteBF_dword(4, 1, ADF4355_R[7], 1);
+  }
+  else {
+    ADF4355_R[7] = BitFieldManipulation.WriteBF_dword(4, 1, ADF4355_R[7], 0);
+  }
+  UpdateFrequencyRegs();
+}
+
 int ADF4355::setPowerLevel(uint8_t PowerLevel) {
   if (PowerLevel < 0 && PowerLevel > 4) return ADF4355_ERROR_POWER_LEVEL;
   if (PowerLevel == 0) {
@@ -623,6 +703,24 @@ int ADF4355::setAuxPowerLevel(uint8_t PowerLevel) {
     ADF4355_R[6] = BitFieldManipulation.WriteBF_dword(9, 1, ADF4355_R[6], 1);
     ADF4355_R[6] = BitFieldManipulation.WriteBF_dword(7, 2, ADF4355_R[6], PowerLevel);
   }
+  UpdateFrequencyRegs();
+  return ADF4355_ERROR_NONE;
+}
+
+int ADF4355::setCPcurrent(float Current) {
+  if (Current < 0.3125) {
+    Current = 0.3125;
+  }
+  if (Current > 5) {
+    Current = 5;
+  }
+  float ADF4355_ChargePumpCurrent_float = ChargePumpCurrent;
+  ADF4355_ChargePumpCurrent_float += 0.15625; // round it
+  ADF4355_ChargePumpCurrent_float *= 10000; // convert to an integer
+  uint32_t ADF4355_ChargePumpCurrent = ADF4355_ChargePumpCurrent_float;
+  ADF4355_ChargePumpCurrent /= 3125; // each step is 0.3125 mA
+  ADF4355_ChargePumpCurrent--; // Step 0 is 0.3125 mA
+  ADF4355_R[4] = BitFieldManipulation.WriteBF_dword(10, 4, ADF4355_R[4], ADF4355_ChargePumpCurrent);
   UpdateFrequencyRegs();
   return ADF4355_ERROR_NONE;
 }

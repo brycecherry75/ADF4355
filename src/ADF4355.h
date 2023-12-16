@@ -93,8 +93,10 @@ class ADF4355
     int SetStepFreq(uint32_t value);
     int setf(char *freq, uint8_t PowerLevel, uint8_t AuxPowerLevel, uint32_t CalculationTimeout); // set freq and power levels and output mode
     int setrf(uint32_t f, uint16_t r, uint8_t ReferenceDivisionType, uint8_t ReferenceInputType); // set reference freq and reference divider (default is 10 MHz with divide by 1)
+    void setfDirect(uint16_t R_divider, uint16_t INT_value, uint32_t FRAC1_value, uint16_t FRAC2_value, uint16_t MOD2_value, uint8_t RF_DIVIDER_value, uint8_t PRESCALER_value);
     int setPowerLevel(uint8_t PowerLevel);
     int setAuxPowerLevel(uint8_t PowerLevel);
+    int setCPcurrent(float Current);
 
     void ReadSweepValues(uint32_t *regs);
     void WriteSweepValues(const uint32_t *regs);
